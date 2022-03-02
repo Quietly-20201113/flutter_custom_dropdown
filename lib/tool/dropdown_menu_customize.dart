@@ -2,14 +2,15 @@ import 'package:flutter/cupertino.dart';
 
 import 'drapdown_common.dart';
 
-typedef Widget BlankMenuItemBuilder<T>(
-    BuildContext context, List<T> data,DropdownMenuController controller);
+typedef Widget BlankMenuItemBuilder<T>(BuildContext context, List<T> data, DropdownMenuController? controller);
 
 ///提供空白页面,内容自定义使用
-class DropdownMenuCustomize<T> extends DropdownWidget{
+class DropdownMenuCustomize<T> extends DropdownWidget {
   final List<T> data;
   final BlankMenuItemBuilder itemBuilder;
-  const DropdownMenuCustomize({Key key,@required this.data,@required this.itemBuilder});
+
+  const DropdownMenuCustomize({Key? key, required this.data, required this.itemBuilder});
+
   @override
   DropdownState<DropdownWidget> createState() {
     // TODO: implement createState
@@ -17,23 +18,20 @@ class DropdownMenuCustomize<T> extends DropdownWidget{
   }
 }
 
-class _MenuListState<T> extends DropdownState<DropdownMenuCustomize<T>>{
-  BlankMenuItemBuilder _itemBuilder;
+class _MenuListState<T> extends DropdownState<DropdownMenuCustomize<T>> {
+  late BlankMenuItemBuilder _itemBuilder;
+
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
     _itemBuilder = widget.itemBuilder;
-    if(widget.itemBuilder == null){
-      _itemBuilder = (BuildContext context, List<Object> data,DropdownMenuController controller){return const SizedBox.expand();};
-    }
   }
-
 
   @override
   Widget build(BuildContext context) {
     // TODO: implement build
-   return _itemBuilder(context,widget.data,controller);
+    return _itemBuilder(context, widget.data, controller);
   }
 
   @override
@@ -49,6 +47,4 @@ class _MenuListState<T> extends DropdownState<DropdownMenuCustomize<T>>{
         break;
     }
   }
-
-
 }

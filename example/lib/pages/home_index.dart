@@ -12,7 +12,7 @@ class HomeIndex extends StatefulWidget {
 }
 
 class _HomeIndexState extends State<HomeIndex> with SingleTickerProviderStateMixin {
-  TabController _tabController;
+  late TabController _tabController;
 
   @override
   void initState() {
@@ -30,12 +30,13 @@ class _HomeIndexState extends State<HomeIndex> with SingleTickerProviderStateMix
       _tabController.index = index;
     });
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: TabBarView(
         controller: _tabController,
-        children: <Widget>[ MotionlessScreeningFilter(),MotionlessMultipleFilter(),MotionlessMovingFilter(),MotionlessScrollFilter()],
+        children: <Widget>[MotionlessScreeningFilter(), MotionlessMultipleFilter(), MotionlessMovingFilter(), MotionlessScrollFilter()],
       ),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _tabController.index,
@@ -43,18 +44,10 @@ class _HomeIndexState extends State<HomeIndex> with SingleTickerProviderStateMix
         fixedColor: Colors.black,
         onTap: _onBottomNavigationBarTap,
         items: <BottomNavigationBarItem>[
-          BottomNavigationBarItem(
-              icon: Icon(Icons.dashboard),
-              title: Text('普普通通')),
-          BottomNavigationBarItem(
-              icon: Icon(Icons.album),
-              title: Text('多选主动')),
-          BottomNavigationBarItem(
-              icon: Icon(Icons.extension),
-              title: Text('自主赋值')),
-          BottomNavigationBarItem(
-              icon: Icon(Icons.style),
-              title: Text('滚滚动动')),
+          BottomNavigationBarItem(icon: Icon(Icons.dashboard), label: '普普通通'),
+          BottomNavigationBarItem(icon: Icon(Icons.album), label: '多选主动'),
+          BottomNavigationBarItem(icon: Icon(Icons.extension), label: '自主赋值'),
+          BottomNavigationBarItem(icon: Icon(Icons.style), label: '滚滚动动'),
         ],
       ),
     );

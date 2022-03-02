@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'dart:ui' as ui show Image, ImageFilter;
+
 import 'package:flutter/material.dart';
+
 import 'drapdown_common.dart';
 
 enum DropdownMenuShowHideSwitchStyle {
@@ -25,46 +27,38 @@ class DropdownMenu extends DropdownWidget {
    * 收起高度
    * TODO : 当下拉收起时出现一丢丢没有收起,可添加收起余长(加个一两百)
    */
-  final double packUpHeight;
+  final double? packUpHeight;
 
   final Duration hideDuration;
   final Duration showDuration;
   final Curve showCurve;
   final Curve hideCurve;
 
-
   /// if set , background is rendered with ImageFilter.blur
-  final double blur;
+  final double? blur;
 
-  final ValueChanged<int> onHide;
+  final ValueChanged<int>? onHide;
 
   /// The style when one menu hide and another menu show ,
   /// see [DropdownMenuShowHideSwitchStyle]
   final DropdownMenuShowHideSwitchStyle switchStyle;
 
-  final double maxMenuHeight;
+  final double? maxMenuHeight;
 
-  DropdownMenu(
-      {@required this.menus,
-      DropdownMenuController controller,
-      Duration hideDuration,
-      Duration showDuration,
-      this.onHide,
-      this.blur,
-       this.packUpHeight,
-      Key key,
-      this.maxMenuHeight,
-      Curve hideCurve,
-      this.switchStyle: DropdownMenuShowHideSwitchStyle
-          .animationShowUntilAnimationHideComplete,
-      Curve showCurve})
-      : hideDuration = hideDuration ?? new Duration(milliseconds: 150),
-        showDuration = showDuration ?? new Duration(milliseconds: 300),
-        showCurve = showCurve ?? Curves.fastOutSlowIn,
-        hideCurve = hideCurve ?? Curves.fastOutSlowIn,
-        super(key: key, controller: controller) {
-    assert(menus != null);
-  }
+  DropdownMenu({
+    Key? key,
+    required this.menus,
+    DropdownMenuController? controller,
+    this.showDuration = const Duration(milliseconds: 300),
+    this.hideDuration = const Duration(milliseconds: 150),
+    this.onHide,
+    this.blur,
+    this.packUpHeight,
+    this.maxMenuHeight,
+    this.hideCurve = Curves.fastOutSlowIn,
+    this.switchStyle: DropdownMenuShowHideSwitchStyle.animationShowUntilAnimationHideComplete,
+    this.showCurve = Curves.fastOutSlowIn,
+  }) : super(key: key, controller: controller);
 
   @override
   DropdownState<DropdownMenu> createState() {
@@ -73,19 +67,20 @@ class DropdownMenu extends DropdownWidget {
 }
 
 class _DropdownAnimation {
-  Animation<Rect> rect;
-  AnimationController animationController;
-  RectTween position;
-  double packUpHeight;
-  _DropdownAnimation(TickerProvider provider,double packUpHeight) {
+  late Animation<Rect?> rect;
+  late AnimationController animationController;
+  late RectTween position;
+  double? packUpHeight;
+
+  _DropdownAnimation(TickerProvider provider, double? packUpHeight) {
     animationController = new AnimationController(vsync: provider);
-    packUpHeight = packUpHeight;
+    this.packUpHeight = packUpHeight;
   }
 
   set height(double value) {
     ///加300防止动画收回时值不够
     position = new RectTween(
-      begin: new Rect.fromLTRB(0.0, -value - (packUpHeight??300), 0.0, 0.0),
+      begin: new Rect.fromLTRB(0.0, -value - (packUpHeight ?? 300), 0.0, 0.0),
       end: new Rect.fromLTRB(0.0, 0.0, 0.0, 0.0),
     );
     rect = position.animate(animationController);
@@ -99,9 +94,8 @@ class _DropdownAnimation {
     animationController.dispose();
   }
 
-  TickerFuture animateTo(double value, {Duration duration, Curve curve}) {
-    return animationController.animateTo(value,
-        duration: duration, curve: curve);
+  TickerFuture animateTo(double value, {required Duration duration, required Curve curve}) {
+    return animationController.animateTo(value, duration: duration, curve: curve);
   }
 }
 
@@ -117,14 +111,13 @@ class SizeClipper extends CustomClipper<Rect> {
   }
 }
 
-class _DropdownMenuState extends DropdownState<DropdownMenu>
-    with TickerProviderStateMixin {
-  List<_DropdownAnimation> _dropdownAnimations;
-  bool _show;
-  List<int> _showing;
-  final double packUpHeight;
-  AnimationController _fadeController;
-  Animation<double> _fadeAnimation;
+class _DropdownMenuState extends DropdownState<DropdownMenu> with TickerProviderStateMixin {
+  late List<_DropdownAnimation> _dropdownAnimations;
+  late bool _show;
+  late List<int> _showing;
+  final double? packUpHeight;
+  late AnimationController _fadeController;
+  late Animation<double> _fadeAnimation;
 
   _DropdownMenuState(this.packUpHeight);
 
@@ -133,7 +126,7 @@ class _DropdownMenuState extends DropdownState<DropdownMenu>
     _showing = [];
     _dropdownAnimations = [];
     for (int i = 0, c = widget.menus.length; i < c; ++i) {
-      _dropdownAnimations.add(new _DropdownAnimation(this,widget.packUpHeight));
+      _dropdownAnimations.add(new _DropdownAnimation(this, widget.packUpHeight));
     }
 
     _updateHeights();
@@ -160,8 +153,7 @@ class _DropdownMenuState extends DropdownState<DropdownMenu>
 
   void _updateHeights() {
     for (int i = 0, c = widget.menus.length; i < c; ++i) {
-      _dropdownAnimations[i].height =
-          _ensureHeight(_getHeight(widget.menus[i]));
+      _dropdownAnimations[i].height = _ensureHeight(_getHeight(widget.menus[i]));
     }
   }
 
@@ -177,9 +169,7 @@ class _DropdownMenuState extends DropdownState<DropdownMenu>
 
     return new ClipRect(
       clipper: new SizeClipper(),
-      child: new SizedBox(
-          height: _ensureHeight(builder.height),
-          child: _showing.contains(i) ? builder.builder(context) : null),
+      child: new SizedBox(height: _ensureHeight(builder.height), child: _showing.contains(i) ? builder.builder(context) : null),
     );
   }
 
@@ -191,8 +181,8 @@ class _DropdownMenuState extends DropdownState<DropdownMenu>
 
     container = new BackdropFilter(
         filter: new ui.ImageFilter.blur(
-          sigmaY: widget.blur??0.0,
-          sigmaX: widget.blur??0.0,
+          sigmaY: widget.blur ?? 0.0,
+          sigmaX: widget.blur ?? 0.0,
         ),
         child: container);
 
@@ -206,8 +196,7 @@ class _DropdownMenuState extends DropdownState<DropdownMenu>
     print("build ${new DateTime.now()}");
     Widget _onShowH = FadeTransition(
       opacity: _fadeAnimation,
-      child: new GestureDetector(
-          onTap: onHide, child: _buildBackground(context)),
+      child: new GestureDetector(onTap: onHide, child: _buildBackground(context)),
     );
     if (_show) {
       list.add(_onShowH);
@@ -234,19 +223,18 @@ class _DropdownMenuState extends DropdownState<DropdownMenu>
 
   TickerFuture onHide({bool dispatch: true}) {
     if (_activeIndex != null) {
-      int index = _activeIndex;
+      int index = _activeIndex!;
       _activeIndex = null;
       TickerFuture future = _hide(index);
       if (dispatch) {
         if (controller != null) {
-          controller.hide();
+          controller!.hide();
         }
 
-        if (widget.onHide != null) widget.onHide(_activeIndex);
+        if (widget.onHide != null) widget.onHide!(_activeIndex!);
       }
 
-      _fadeController.animateTo(0.0,
-          duration: widget.hideDuration, curve: widget.hideCurve);
+      _fadeController.animateTo(0.0, duration: widget.hideDuration, curve: widget.hideCurve);
 
       future.whenComplete(() {
         setState(() {
@@ -260,12 +248,11 @@ class _DropdownMenuState extends DropdownState<DropdownMenu>
   }
 
   TickerFuture _hide(int index) {
-    TickerFuture future = _dropdownAnimations[index]
-        .animateTo(0.0, duration: widget.hideDuration, curve: widget.hideCurve);
+    TickerFuture future = _dropdownAnimations[index].animateTo(0.0, duration: widget.hideDuration, curve: widget.hideCurve);
     return future;
   }
 
-  int _activeIndex;
+  int? _activeIndex;
 
   Future<void> onShow(int index) {
     //哪一个是要展示的
@@ -283,7 +270,7 @@ class _DropdownMenuState extends DropdownState<DropdownMenu>
       switch (widget.switchStyle) {
         case DropdownMenuShowHideSwitchStyle.directHideAnimationShow:
           {
-            _dropdownAnimations[_activeIndex].value = 0.0;
+            _dropdownAnimations[_activeIndex!].value = 0.0;
             _dropdownAnimations[index].value = 1.0;
             _activeIndex = index;
 
@@ -297,22 +284,20 @@ class _DropdownMenuState extends DropdownState<DropdownMenu>
           break;
         case DropdownMenuShowHideSwitchStyle.animationHideAnimationShow:
           {
-            _hide(_activeIndex);
+            _hide(_activeIndex!);
           }
           break;
         case DropdownMenuShowHideSwitchStyle.directHideDirectShow:
           {
-            _dropdownAnimations[_activeIndex].value = 0.0;
+            _dropdownAnimations[_activeIndex!].value = 0.0;
           }
           break;
-        case DropdownMenuShowHideSwitchStyle
-            .animationShowUntilAnimationHideComplete:
+        case DropdownMenuShowHideSwitchStyle.animationShowUntilAnimationHideComplete:
           {
-            return _hide(_activeIndex).whenComplete(() {
+            return _hide(_activeIndex!).whenComplete(() {
               return _handleShow(index, true);
             });
           }
-          break;
       }
     }
 
@@ -326,11 +311,9 @@ class _DropdownMenuState extends DropdownState<DropdownMenu>
       _show = true;
     });
 
-    _fadeController.animateTo(1.0,
-        duration: widget.showDuration, curve: widget.showCurve);
+    _fadeController.animateTo(1.0, duration: widget.showDuration, curve: widget.showCurve);
 
-    return _dropdownAnimations[index]
-        .animateTo(1.0, duration: widget.showDuration, curve: widget.showCurve);
+    return _dropdownAnimations[index].animateTo(1.0, duration: widget.showDuration, curve: widget.showCurve);
   }
 
   double _getHeight(dynamic menu) {
@@ -339,15 +322,15 @@ class _DropdownMenuState extends DropdownState<DropdownMenu>
     return builder.height;
   }
 
-  double _ensureHeight(double height) {
-    final double maxMenuHeight = widget.maxMenuHeight;
+  double _ensureHeight(double? height) {
+    final double? maxMenuHeight = widget.maxMenuHeight;
     assert(height != null || maxMenuHeight != null,
         "DropdownMenu.maxMenuHeight and DropdownMenuBuilder.height must not both null,| 下拉的高度与下拉内容的高度都要有高度,给一下 ");
     if (maxMenuHeight != null) {
       if (height == null) return maxMenuHeight;
       return height > maxMenuHeight ? maxMenuHeight : height;
     }
-    return height;
+    return height!;
   }
 
   @override
@@ -361,7 +344,7 @@ class _DropdownMenuState extends DropdownState<DropdownMenu>
         break;
       case DropdownEvent.ACTIVE:
         {
-          onShow(controller.menuIndex);
+          onShow(controller!.menuIndex);
         }
         break;
     }
