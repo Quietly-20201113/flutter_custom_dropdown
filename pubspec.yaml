@@ -1,5 +1,5 @@
 name: flutter_custom_dropdown
-description: A new flutter plugin project.
+description: This is a custom drop-down plugin developed using pure dart, which can be used for aple drop-down filtering and other functions in the mall.
 version: 0.0.3
 #author: Quietly-20201113<dp18487115313@gmail.com>
 homepage: https://github.com/Quietly-20201113/flutter_custom_dropdown
